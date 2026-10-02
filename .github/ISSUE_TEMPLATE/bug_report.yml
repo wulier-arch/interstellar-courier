@@ -1,0 +1,53 @@
+name: 报告问题（Bug）
+description: 报告一个可复现的缺陷
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你发现问题！请尽量提供可复现的步骤，空白 Issue 很难定位。
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 问题描述
+      description: 发生了什么？实际表现与预期表现分别是什么？
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 打开 index.html
+        2. 点击「开始送快递」
+        3. 按住方向键向左移动
+        4. 观察到 ...
+    validations:
+      required: true
+
+  - type: input
+    id: env
+    attributes:
+      label: 运行环境
+      description: 浏览器版本 + 操作系统 + 设备类型（桌面/平板/手机）
+      placeholder: Safari 18 / macOS 15 / 桌面
+    validations:
+      required: true
+
+  - type: textarea
+    id: console-log
+    attributes:
+      label: 控制台报错
+      description: 如果游戏崩溃，请粘贴浏览器控制台的红色报错
+      render: text
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 确认
+      options:
+        - label: 我已搜索过现有 Issue，确认不是重复问题
+          required: true

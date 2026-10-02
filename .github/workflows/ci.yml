@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# 只需要读取权限
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: 校验
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 准备 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: JS 语法检查
+        run: node --check assets/js/game.js
+
+      - name: 项目自检（结构 / 零依赖 / 必需文件）
+        run: node scripts/check-project.mjs
+
+      - name: 确认未引入依赖清单
+        run: |
+          if [ -f package.json ] || [ -d node_modules ]; then
+            echo "::error::本项目坚持零依赖，不应出现 package.json 或 node_modules"
+            exit 1
+          fi
+          echo "✅ 保持零依赖"
+
+      - name: 确认关键文件已提交
+        run: |
+          for f in index.html assets/css/style.css assets/js/game.js \
+                   README.md LICENSE CHANGELOG.md CONTRIBUTING.md \
+                   CODE_OF_CONDUCT.md SECURITY.md; do
+            git ls-files --error-unmatch "$f" >/dev/null 2>&1 || {
+              echo "::error::文件未纳入版本管理：$f"
+              exit 1
+            }
+          done
+          echo "✅ 关键文件均已提交"

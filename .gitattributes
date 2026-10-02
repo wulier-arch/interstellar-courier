@@ -1,0 +1,18 @@
+# 统一换行符为 LF，避免跨平台协作时的无谓 diff
+* text=auto eol=lf
+
+# 二进制文件不做换行符转换，也不参与 diff
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.mp3 binary
+*.mp4 binary
+*.woff binary
+*.woff2 binary
+
+#  linguist-generated 表示该文件由工具生成，不计入代码统计
+*.min.js linguist-generated=true
+*.min.css linguist-generated=true

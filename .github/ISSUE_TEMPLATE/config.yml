@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 玩法建议
+    url: https://github.com/wulier-arch/interstellar-courier/discussions/1
+    about: 更适合在这里交流玩法想法与改进点子
+  - name: 安全漏洞报告
+    url: https://github.com/wulier-arch/interstellar-courier/security/advisories/new
+    about: 请勿用公开 Issue 报告安全问题
