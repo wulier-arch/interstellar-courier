@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="星际快递员">
+  <rect width="64" height="64" rx="14" fill="#10101c"/>
+  <circle cx="32" cy="32" r="24" fill="#29204c" opacity=".55"/>
+  <!-- 发光的收集星星 -->
+  <path d="M48 15.5l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.8-2-3.8 2 .7-4.3-3.1-3 4.3-.6z" fill="#ffe99a"/>
+  <!-- 快递飞船：尾翼 + 机身 + 舷窗，与游戏内造型一致 -->
+  <g transform="translate(30 33) scale(1.45)">
+    <path d="M0 19 -6 9 6 9Z" fill="#8977ce"/>
+    <path d="M0-17Q13-3 10 10H-10Q-13-3 0-17Z" fill="#ded5ff"/>
+    <ellipse cx="0" cy="-2" rx="4" ry="6" fill="#8977ce"/>
+  </g>
+  <!-- 陨石 -->
+  <path d="M14 47l3.6-1.4 2.9 2.8-1.3 3.7-3.9.6-2.3-2.9z" fill="#c57971"/>
+</svg>

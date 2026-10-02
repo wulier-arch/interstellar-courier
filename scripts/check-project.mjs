@@ -20,17 +20,34 @@ const warnings = [];
 const read = (rel) => readFileSync(resolve(root, rel), "utf8");
 
 // 1. index.html 引用的本地资源是否存在
+//    只检查会真正发起网络请求的标签；canonical、license 等纯元信息不计入「零外部依赖」
 const html = read("index.html");
-const refPattern = /(?:src|href)\s*=\s*"([^"]+)"/g;
-for (const match of html.matchAll(refPattern)) {
-  const ref = match[1];
-  if (/^(https?:)?\/\//.test(ref)) {
-    errors.push(`index.html 引用了外部资源：${ref}`);
-    continue;
+const resourceTags = /<(script|link|img|iframe|source|video|audio|embed|object)\b([^>]*)>/gi;
+const refPattern = /(?<![\w-])(?:src|href)\s*=\s*"([^"]+)"/gi;
+const nonResourceRels = new Set([
+  "canonical", "alternate", "author", "license", "next", "prev", "search",
+]);
+
+for (const tag of html.matchAll(resourceTags)) {
+  const tagName = tag[1].toLowerCase();
+  const attrs = tag[2] || "";
+
+  if (tagName === "link") {
+    const rel = (attrs.match(/rel\s*=\s*"([^"]*)"/i) || [])[1] || "";
+    const tokens = rel.toLowerCase().split(/\s+/).filter(Boolean);
+    if (tokens.some((token) => nonResourceRels.has(token))) continue;
   }
-  if (/^(data:|mailto:|#)/.test(ref)) continue;
-  if (!existsSync(resolve(root, ref))) {
-    errors.push(`index.html 引用的资源不存在：${ref}`);
+
+  for (const attr of attrs.matchAll(refPattern)) {
+    const ref = attr[1];
+    if (/^(https?:)?\/\//.test(ref)) {
+      errors.push(`index.html 的 <${tagName}> 引用了外部资源：${ref}`);
+      continue;
+    }
+    if (/^(data:|mailto:|#|\{\{)/.test(ref)) continue;
+    if (!existsSync(resolve(root, ref))) {
+      errors.push(`index.html 引用的资源不存在：${ref}`);
+    }
   }
 }
 

@@ -12,7 +12,9 @@
 
 ## 🎮 快速开始
 
-无需安装任何东西，二选一：
+**▶ 在线试玩：<https://wulier-arch.github.io/interstellar-courier/>**
+
+本地运行无需安装任何东西，二选一：
 
 ```bash
 # 方式一：直接用浏览器打开
