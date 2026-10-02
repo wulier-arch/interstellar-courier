@@ -15,12 +15,22 @@ const resultScore = document.querySelector("#result-score");
 const resultTime = document.querySelector("#result-time");
 const resultBest = document.querySelector("#result-best");
 const recordBadge = document.querySelector("#record");
+const soundButton = document.querySelector("#sound-toggle");
 
 const storage = (() => {
   try {
     return window.localStorage;
   } catch (error) {
     return null;
+  }
+})();
+
+// 音效层同样需要容错：脚本缺失或存储不可用时静默降级，绝不影响游戏
+const soundPlayer = (() => {
+  try {
+    return window.GameAudio.createPlayer({ storage });
+  } catch (error) {
+    return { play: () => false, isEnabled: () => false, toggle: () => false };
   }
 })();
 
@@ -43,6 +53,14 @@ let previousTime = 0;
 
 function refreshBestLabel() {
   bestLabel.textContent = core.formatScore(core.readBestScore(storage));
+}
+
+function syncSoundButton() {
+  if (!soundButton) return;
+  const on = soundPlayer.isEnabled();
+  soundButton.textContent = on ? "🔊 音效" : "🔇 静音";
+  soundButton.setAttribute("aria-pressed", String(on));
+  soundButton.setAttribute("aria-label", on ? "关闭音效" : "开启音效");
 }
 
 function resize() {
@@ -80,6 +98,7 @@ function reset() {
   livesLabel.textContent = core.formatLives(lives);
   levelLabel.textContent = String(level);
   refreshBestLabel();
+  syncSoundButton();
 }
 
 function start() {
@@ -89,6 +108,8 @@ function start() {
   overlay.hidden = true;
   running = true;
   previousTime = performance.now();
+  // 起跑音紧跟用户手势，否则会被浏览器自动播放策略拦下
+  soundPlayer.play("start");
   requestAnimationFrame(frame);
 }
 
@@ -107,6 +128,7 @@ function endGame() {
   startButton.textContent = "再玩一次";
   overlay.hidden = false;
   refreshBestLabel();
+  soundPlayer.play("gameOver");
 }
 
 function spawnMeteor() {
@@ -150,6 +172,8 @@ function update(dt) {
   if (difficulty.level !== level) {
     level = difficulty.level;
     levelLabel.textContent = String(level);
+    // 升阶提示音，让难度变化可被感知
+    soundPlayer.play("levelUp");
   }
 
   meteorClock -= dt;
@@ -171,6 +195,7 @@ function update(dt) {
       lives--;
       player.invulnerable = 1.1;
       livesLabel.textContent = core.formatLives(lives);
+      soundPlayer.play("hit");
       if (lives <= 0) {
         endGame();
         return;
@@ -186,6 +211,7 @@ function update(dt) {
       star.collected = true;
       score++;
       scoreLabel.textContent = core.formatScore(score);
+      soundPlayer.play("collect");
     }
   }
   stars = stars.filter(star => !star.collected && star.y < height + 20);
@@ -326,7 +352,17 @@ document.querySelectorAll(".touch-button").forEach(button => {
   button.addEventListener("lostpointercapture", release);
 });
 
+// 静音开关本身就是用户手势，正好用来唤醒被自动播放策略挂起的音频上下文
+if (soundButton) {
+  soundButton.addEventListener("click", () => {
+    const on = soundPlayer.toggle();
+    syncSoundButton();
+    if (on) soundPlayer.play("collect");
+  });
+}
+
 window.addEventListener("blur", () => keys.clear());
 window.addEventListener("resize", resize);
 resize();
 refreshBestLabel();
+syncSoundButton();

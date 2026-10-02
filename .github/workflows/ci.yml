@@ -33,13 +33,15 @@ jobs:
           node-version: ${{ matrix.node }}
 
       - name: JS 语法检查
-        run: node --check assets/js/game.js && node --check assets/js/game-core.js
+        run: node --check assets/js/game.js && node --check assets/js/game-core.js && node --check assets/js/game-audio.js
 
-      - name: 项目自检（结构 / 零依赖 / 必需文件）
+      - name: 项目自检（结构 / 零依赖 / 必需文件 / 体积预算）
         run: node scripts/check-project.mjs
 
       - name: 单元测试
-        run: node --test tests/game-core.test.mjs
+        run: |
+          node --test tests/game-core.test.mjs
+          node --test tests/game-audio.test.mjs
 
       - name: 确认未引入依赖清单
         run: |
@@ -52,10 +54,11 @@ jobs:
       - name: 确认关键文件已提交
         run: |
           for f in index.html assets/css/style.css assets/js/game.js \
-                   assets/js/game-core.js assets/favicon.svg assets/og.png \
+                   assets/js/game-core.js assets/js/game-audio.js \
+                   assets/favicon.svg assets/og.png \
                    README.md LICENSE CHANGELOG.md CONTRIBUTING.md \
                    CODE_OF_CONDUCT.md SECURITY.md robots.txt sitemap.xml \
-                   tests/game-core.test.mjs; do
+                   tests/game-core.test.mjs tests/game-audio.test.mjs; do
             git ls-files --error-unmatch "$f" >/dev/null 2>&1 || {
               echo "::error::文件未纳入版本管理：$f"
               exit 1

@@ -34,6 +34,7 @@ python3 -m http.server 8000
 | 移动 | `←` `↑` `↓` `→` 或 `W` `A` `S` `D` |
 | 暂停 / 继续 | `Esc`（再点按钮继续） |
 | 触屏移动 | 屏幕下方的方向按钮 |
+| 开关音效 | 页脚「🔊 音效」按钮（选择会被记住） |
 
 - ✦ **收集星星**加分
 - ☄ **撞到陨石**会损失一艘飞船，共 3 艘
@@ -45,9 +46,11 @@ python3 -m http.server 8000
 
 - **零依赖、零构建**：只有原生 HTML / CSS / JavaScript，没有 `node_modules`，没有打包器
 - **零外部资源**：不加载任何 CDN，断网也能完整游玩
+- **音效实时合成**：WebAudio 振荡器现场生成，仓库里没有一个音频文件
+- **体积可控**：自检脚本对核心文件设定体积预算，超限即失败
 - **高分屏适配**：按 `devicePixelRatio` 渲染，缩放窗口自动重算画布
 - **响应式**：同一套代码适配桌面与手机平板
-- **逻辑可测**：游戏逻辑抽到 `game-core.js`，配 31 个零依赖单元测试
+- **逻辑可测**：游戏逻辑抽到 `game-core.js` / `game-audio.js`，配 47 个零依赖单元测试
 - **无障碍基础**：语义化标签、`aria-label`、键盘可操作
 
 ## 📁 项目结构
@@ -59,11 +62,13 @@ interstellar-courier/
 │   ├── css/style.css       # 全部样式
 │   └── js/
 │       ├── game-core.js    # 纯逻辑层：碰撞、难度、存档（无 DOM 依赖，可单测）
+│       ├── game-audio.js   # 音效层：WebAudio 实时合成，不加载音频文件
 │       └── game.js         # 渲染、输入与界面驱动
 ├── tests/
-│   └── game-core.test.mjs  # 单元测试（Node 内置 test runner，零依赖）
+│   ├── game-core.test.mjs  # 单元测试（31 个用例）
+│   └── game-audio.test.mjs # 单元测试（16 个用例）
 ├── scripts/
-│   └── check-project.mjs   # 零依赖项目自检脚本
+│   └── check-project.mjs   # 零依赖项目自检脚本（含体积预算）
 ├── .github/
 │   ├── workflows/ci.yml    # 持续集成
 │   ├── ISSUE_TEMPLATE/     # Issue 表单
@@ -80,10 +85,12 @@ interstellar-courier/
 ## 🛠️ 本地自检
 
 ```bash
-node --check assets/js/game.js      # JS 语法检查
-node --check assets/js/game-core.js # 纯逻辑层语法检查
-node --test tests/game-core.test.mjs # 单元测试（31 个用例）
-node scripts/check-project.mjs      # 结构、依赖、必需文件自检
+node --check assets/js/game.js          # JS 语法检查
+node --check assets/js/game-core.js     # 纯逻辑层语法检查
+node --check assets/js/game-audio.js    # 音效层语法检查
+node --test tests/game-core.test.mjs    # 单元测试（31 个用例）
+node --test tests/game-audio.test.mjs   # 单元测试（16 个用例）
+node scripts/check-project.mjs          # 结构、依赖、必需文件、体积预算
 ```
 
 以上全部零依赖，也是 CI 在每次 push / PR 上执行的检查。
@@ -95,6 +102,10 @@ node scripts/check-project.mjs      # 结构、依赖、必需文件自检
 - **碰撞**：圆形距离判定，星星与陨石各用半径数组
 - **输入**：键盘事件写入 `Set`，触屏按钮用 Pointer Events 统一处理
   （`pointerup` / `pointercancel` / `lostpointercapture` 三路释放，避免拖拽后按键卡住）
+- **音效**：WebAudio 振荡器 + 指数包络，配方写在 `game-audio.js` 的 `RECIPES` 表里，
+  改数值即可调音。增益衰减目标固定 `0.0001` 而非 0 —— 指数插值到 0 会抛异常
+- **自动播放策略**：`AudioContext` 懒加载，起跑音紧跟点击手势；静音开关本身也是一次用户手势，
+  正好用来唤醒被挂起的上下文
 - **状态**：`running` 标志与遮罩层驱动运行、暂停、结束三种界面
 
 ## 🤝 参与贡献

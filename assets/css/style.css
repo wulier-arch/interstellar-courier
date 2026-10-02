@@ -194,6 +194,23 @@ canvas {
 .legend span { white-space: nowrap; }
 .legend b { color: #f1eaff; }
 
+.sound-toggle {
+  padding: 5px 12px;
+  border: 1px solid #ffffff1f;
+  border-radius: 999px;
+  background: #ffffff0d;
+  color: #d9d3f2;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s ease, border-color .15s ease;
+}
+
+.sound-toggle:hover { background: #ffffff1a; }
+.sound-toggle:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
 .touch-controls {
   display: none;
   justify-content: center;

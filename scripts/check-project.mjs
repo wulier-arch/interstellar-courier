@@ -9,7 +9,7 @@
  *
  * 退出码 0 表示全部通过，1 表示存在错误。
  */
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -70,8 +70,34 @@ const required = [
   ".gitignore",
   ".editorconfig",
   "assets/js/game-core.js",
+  "assets/js/game-audio.js",
   "tests/game-core.test.mjs",
+  "tests/game-audio.test.mjs",
 ];
+
+// 6. 体积预算：守住「零依赖、小体量」的承诺，防止意外引入大文件
+const budgets = [
+  { file: "assets/js/game-core.js", limit: 6 * 1024 },
+  { file: "assets/js/game-audio.js", limit: 6 * 1024 },
+  { file: "assets/js/game.js", limit: 16 * 1024 },
+  { file: "assets/css/style.css", limit: 10 * 1024 },
+  { file: "index.html", limit: 10 * 1024 },
+];
+
+for (const { file, limit } of budgets) {
+  const full = resolve(root, file);
+  if (!existsSync(full)) {
+    errors.push(`体积预算检查的文件不存在：${file}`);
+    continue;
+  }
+  const size = statSync(full).size;
+  const kb = (size / 1024).toFixed(1);
+  if (size > limit) {
+    errors.push(`${file} 体积 ${kb}KB 超出预算 ${(limit / 1024).toFixed(0)}KB`);
+  } else {
+    console.log(`  体积 ${file}: ${kb}KB / 预算 ${(limit / 1024).toFixed(0)}KB`);
+  }
+}
 for (const rel of required) {
   if (!existsSync(resolve(root, rel))) errors.push(`缺少必需文件：${rel}`);
 }
