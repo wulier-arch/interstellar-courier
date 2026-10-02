@@ -18,17 +18,22 @@ jobs:
   validate:
     name: 校验
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 与本地开发环境（Node 24）保持一致，同时覆盖仍广泛使用的 LTS
+        node: ['20', '24']
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
 
-      - name: 准备 Node
+      - name: 准备 Node ${{ matrix.node }}
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ matrix.node }}
 
       - name: JS 语法检查
-        run: node --check assets/js/game.js
+        run: node --check assets/js/game.js && node --check assets/js/game-core.js
 
       - name: 项目自检（结构 / 零依赖 / 必需文件）
         run: node scripts/check-project.mjs
@@ -47,8 +52,10 @@ jobs:
       - name: 确认关键文件已提交
         run: |
           for f in index.html assets/css/style.css assets/js/game.js \
+                   assets/js/game-core.js assets/favicon.svg assets/og.png \
                    README.md LICENSE CHANGELOG.md CONTRIBUTING.md \
-                   CODE_OF_CONDUCT.md SECURITY.md; do
+                   CODE_OF_CONDUCT.md SECURITY.md robots.txt sitemap.xml \
+                   tests/game-core.test.mjs; do
             git ls-files --error-unmatch "$f" >/dev/null 2>&1 || {
               echo "::error::文件未纳入版本管理：$f"
               exit 1
