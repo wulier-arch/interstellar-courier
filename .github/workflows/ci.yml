@@ -33,6 +33,9 @@ jobs:
       - name: 项目自检（结构 / 零依赖 / 必需文件）
         run: node scripts/check-project.mjs
 
+      - name: 单元测试
+        run: node --test tests/game-core.test.mjs
+
       - name: 确认未引入依赖清单
         run: |
           if [ -f package.json ] || [ -d node_modules ]; then

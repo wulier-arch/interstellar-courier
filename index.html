@@ -18,6 +18,8 @@
         <div class="stats" aria-label="游戏状态">
           <div class="stat"><span class="stat-label">星星</span><span class="stat-value" id="score">00</span></div>
           <div class="stat"><span class="stat-label">飞船</span><span class="stat-value" id="lives">♥ ♥ ♥</span></div>
+          <div class="stat"><span class="stat-label">最高</span><span class="stat-value" id="best">00</span></div>
+          <div class="stat"><span class="stat-label">难度</span><span class="stat-value" id="level">1</span></div>
         </div>
       </header>
 
@@ -28,6 +30,12 @@
             <div class="mascot" aria-hidden="true">🛸</div>
             <h2 id="overlay-title">今晚也要准时送达</h2>
             <p id="overlay-copy">驾驶小飞船穿过流星雨，收集沿途的星星。撞到陨石会消耗一艘飞船。</p>
+            <dl class="result" id="result" hidden>
+              <div class="result-row"><dt>本局星星</dt><dd id="result-score">0 颗</dd></div>
+              <div class="result-row"><dt>坚持时间</dt><dd id="result-time">0 秒</dd></div>
+              <div class="result-row"><dt>历史最高</dt><dd id="result-best">0 颗</dd></div>
+            </dl>
+            <p class="record" id="record" hidden>🏆 刷新纪录</p>
             <button class="primary" id="start-button" type="button">开始送快递</button>
           </div>
         </div>
@@ -46,6 +54,7 @@
       </footer>
     </main>
 
+    <script src="assets/js/game-core.js"></script>
     <script src="assets/js/game.js"></script>
   </body>
 </html>

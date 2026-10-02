@@ -52,6 +52,8 @@ const required = [
   "SECURITY.md",
   ".gitignore",
   ".editorconfig",
+  "assets/js/game-core.js",
+  "tests/game-core.test.mjs",
 ];
 for (const rel of required) {
   if (!existsSync(resolve(root, rel))) errors.push(`缺少必需文件：${rel}`);

@@ -125,6 +125,47 @@ canvas {
   line-height: 1.7;
 }
 
+.result {
+  display: grid;
+  gap: 7px;
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border: 1px solid #ffffff1f;
+  border-radius: 16px;
+  background: #ffffff0a;
+  text-align: left;
+}
+
+.result[hidden] { display: none; }
+
+.result-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.result-row dt {
+  color: #a9a2c2;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.result-row dd {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.record {
+  margin: -4px 0 16px;
+  color: #ffd479;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.record[hidden] { display: none; }
+
 .primary {
   min-height: 46px;
   padding: 0 22px;

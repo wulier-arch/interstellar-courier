@@ -36,6 +36,8 @@ python3 -m http.server 8000
 - ✦ **收集星星**加分
 - ☄ **撞到陨石**会损失一艘飞船，共 3 艘
 - 撞到陨石后有短暂无敌时间，期间飞船会闪烁
+- ⚡ **难度递增**：60 秒内从 1 级拉满到 5 级，陨石越来越密、越来越快
+- 🏆 **最高分自动保存**，破纪录时会有提示
 
 ## ✨ 特点
 
@@ -43,6 +45,7 @@ python3 -m http.server 8000
 - **零外部资源**：不加载任何 CDN，断网也能完整游玩
 - **高分屏适配**：按 `devicePixelRatio` 渲染，缩放窗口自动重算画布
 - **响应式**：同一套代码适配桌面与手机平板
+- **逻辑可测**：游戏逻辑抽到 `game-core.js`，配 31 个零依赖单元测试
 - **无障碍基础**：语义化标签、`aria-label`、键盘可操作
 
 ## 📁 项目结构
@@ -52,7 +55,11 @@ interstellar-courier/
 ├── index.html              # 页面骨架
 ├── assets/
 │   ├── css/style.css       # 全部样式
-│   └── js/game.js          # 游戏逻辑：渲染、输入、碰撞、状态机
+│   └── js/
+│       ├── game-core.js    # 纯逻辑层：碰撞、难度、存档（无 DOM 依赖，可单测）
+│       └── game.js         # 渲染、输入与界面驱动
+├── tests/
+│   └── game-core.test.mjs  # 单元测试（Node 内置 test runner，零依赖）
 ├── scripts/
 │   └── check-project.mjs   # 零依赖项目自检脚本
 ├── .github/
@@ -71,11 +78,13 @@ interstellar-courier/
 ## 🛠️ 本地自检
 
 ```bash
-node --check assets/js/game.js    # JS 语法检查
-node scripts/check-project.mjs    # 结构、依赖、必需文件自检
+node --check assets/js/game.js      # JS 语法检查
+node --check assets/js/game-core.js # 纯逻辑层语法检查
+node --test tests/game-core.test.mjs # 单元测试（31 个用例）
+node scripts/check-project.mjs      # 结构、依赖、必需文件自检
 ```
 
-两条命令零依赖，也是 CI 在每次 push / PR 上执行的检查。
+以上全部零依赖，也是 CI 在每次 push / PR 上执行的检查。
 
 ## 🧱 技术实现
 

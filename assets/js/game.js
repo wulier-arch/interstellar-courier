@@ -1,3 +1,5 @@
+const core = window.GameCore;
+
 const canvas = document.querySelector("#game-canvas");
 const ctx = canvas.getContext("2d");
 const overlay = document.querySelector("#overlay");
@@ -6,6 +8,22 @@ const copy = document.querySelector("#overlay-copy");
 const startButton = document.querySelector("#start-button");
 const scoreLabel = document.querySelector("#score");
 const livesLabel = document.querySelector("#lives");
+const bestLabel = document.querySelector("#best");
+const levelLabel = document.querySelector("#level");
+const result = document.querySelector("#result");
+const resultScore = document.querySelector("#result-score");
+const resultTime = document.querySelector("#result-time");
+const resultBest = document.querySelector("#result-best");
+const recordBadge = document.querySelector("#record");
+
+const storage = (() => {
+  try {
+    return window.localStorage;
+  } catch (error) {
+    return null;
+  }
+})();
+
 const keys = new Set();
 
 let width = 0;
@@ -15,12 +33,17 @@ let meteors = [];
 let stars = [];
 let backgroundStars = [];
 let score = 0;
-let lives = 3;
+let lives = core.MAX_LIVES;
 let elapsed = 0;
+let level = 1;
 let meteorClock = 0;
 let starClock = 0;
 let running = false;
 let previousTime = 0;
+
+function refreshBestLabel() {
+  bestLabel.textContent = core.formatScore(core.readBestScore(storage));
+}
 
 function resize() {
   const bounds = canvas.getBoundingClientRect();
@@ -45,19 +68,24 @@ function resize() {
 
 function reset() {
   score = 0;
-  lives = 3;
+  lives = core.MAX_LIVES;
   elapsed = 0;
+  level = 1;
   meteorClock = .3;
   starClock = 1;
   meteors = [];
   stars = [];
-  player = { x: width / 2, y: height * .78, radius: 15, speed: 250, invulnerable: 0 };
-  scoreLabel.textContent = "00";
-  livesLabel.textContent = "♥ ♥ ♥";
+  player = core.createPlayer(width, height);
+  scoreLabel.textContent = core.formatScore(score);
+  livesLabel.textContent = core.formatLives(lives);
+  levelLabel.textContent = String(level);
+  refreshBestLabel();
 }
 
 function start() {
   reset();
+  result.hidden = true;
+  recordBadge.hidden = true;
   overlay.hidden = true;
   running = true;
   previousTime = performance.now();
@@ -66,10 +94,19 @@ function start() {
 
 function endGame() {
   running = false;
-  title.textContent = "快递任务完成！";
-  copy.textContent = `你收集了 ${score} 颗星星，坚持了 ${Math.floor(elapsed)} 秒。要不要再飞一趟？`;
+  const { best, isRecord } = core.commitScore(storage, score);
+  title.textContent = isRecord ? "刷新纪录！" : "快递任务完成！";
+  copy.textContent = isRecord
+    ? "这趟飞得比以往任何一次都远，星星记得牢牢的。"
+    : "货舱已经清点完毕，下一单马上出发。";
+  resultScore.textContent = `${score} 颗`;
+  resultTime.textContent = `${core.formatSeconds(elapsed)} 秒`;
+  resultBest.textContent = `${best} 颗`;
+  result.hidden = false;
+  recordBadge.hidden = !isRecord;
   startButton.textContent = "再玩一次";
   overlay.hidden = false;
+  refreshBestLabel();
 }
 
 function spawnMeteor() {
@@ -78,7 +115,7 @@ function spawnMeteor() {
     x: radius + Math.random() * (width - radius * 2),
     y: -radius - 5,
     radius,
-    speed: 115 + Math.random() * 95 + Math.min(elapsed * 2.2, 100),
+    speed: 115 + Math.random() * 95 + core.difficultyAt(elapsed).meteorSpeedBonus,
     drift: (Math.random() - .5) * 42,
     angle: Math.random() * Math.PI * 2,
     spin: (Math.random() - .5) * 2.4
@@ -105,15 +142,21 @@ function update(dt) {
   if (keys.has("ArrowRight") || keys.has("d")) dx++;
   if (keys.has("ArrowUp") || keys.has("w")) dy--;
   if (keys.has("ArrowDown") || keys.has("s")) dy++;
-  const length = Math.hypot(dx, dy) || 1;
-  player.x = Math.max(18, Math.min(width - 18, player.x + dx / length * player.speed * dt));
-  player.y = Math.max(20, Math.min(height - 20, player.y + dy / length * player.speed * dt));
+  const direction = core.normalizeDirection(dx, dy);
+  player.x = Math.max(18, Math.min(width - 18, player.x + direction.x * player.speed * dt));
+  player.y = Math.max(20, Math.min(height - 20, player.y + direction.y * player.speed * dt));
+
+  const difficulty = core.difficultyAt(elapsed);
+  if (difficulty.level !== level) {
+    level = difficulty.level;
+    levelLabel.textContent = String(level);
+  }
 
   meteorClock -= dt;
   starClock -= dt;
   if (meteorClock <= 0) {
     spawnMeteor();
-    meteorClock = Math.max(.28, .8 - elapsed * .008) + Math.random() * .45;
+    meteorClock = core.nextMeteorInterval(elapsed);
   }
   if (starClock <= 0) {
     spawnStar();
@@ -124,11 +167,10 @@ function update(dt) {
     meteor.y += meteor.speed * dt;
     meteor.x += meteor.drift * dt;
     meteor.angle += meteor.spin * dt;
-    const distance = Math.hypot(player.x - meteor.x, player.y - meteor.y);
-    if (distance < player.radius + meteor.radius * .72 && player.invulnerable === 0) {
+    if (core.circlesOverlap(player, meteor, .72) && player.invulnerable === 0) {
       lives--;
       player.invulnerable = 1.1;
-      livesLabel.textContent = "♥ ".repeat(lives).trim() || "—";
+      livesLabel.textContent = core.formatLives(lives);
       if (lives <= 0) {
         endGame();
         return;
@@ -140,10 +182,10 @@ function update(dt) {
   for (const star of stars) {
     star.y += star.speed * dt;
     star.phase += dt * 4;
-    if (Math.hypot(player.x - star.x, player.y - star.y) < player.radius + star.radius) {
+    if (core.circlesOverlap(player, star)) {
       star.collected = true;
       score++;
-      scoreLabel.textContent = String(score).padStart(2, "0");
+      scoreLabel.textContent = core.formatScore(score);
     }
   }
   stars = stars.filter(star => !star.collected && star.y < height + 20);
@@ -287,3 +329,4 @@ document.querySelectorAll(".touch-button").forEach(button => {
 window.addEventListener("blur", () => keys.clear());
 window.addEventListener("resize", resize);
 resize();
+refreshBestLabel();
