@@ -148,6 +148,23 @@ describe("normalizeDirection 方向归一化", () => {
   it("斜向不会加速", () => {
     const d = core.normalizeDirection(1, 1);
     assert.ok(Math.abs(Math.hypot(d.x, d.y) - 1) < 1e-12);
+  });
+
+  it("无输入返回零向量", () => {
+    same(core.normalizeDirection(0, 0), { x: 0, y: 0 });
+  });
+});
+
+describe("createPlayer", () => {
+  it("位置与初始属性正确", () => {
+    const p = core.createPlayer(800, 500);
+    assert.equal(p.x, 400);
+    assert.equal(p.y, 390);
+    assert.equal(p.invulnerable, 0);
+    assert.ok(p.radius > 0 && p.speed > 0);
+  });
+});
+
 describe("最高分读写", () => {
   it("空存储返回 0", () => {
     assert.equal(core.readBestScore(fakeStorage()), 0);
@@ -225,20 +242,3 @@ describe("格式化输出", () => {
     assert.equal(core.formatSeconds(-1), 0);
   });
 });
-  });
-
-  it("无输入返回零向量", () => {
-    same(core.normalizeDirection(0, 0), { x: 0, y: 0 });
-  });
-});
-
-describe("createPlayer", () => {
-  it("位置与初始属性正确", () => {
-    const p = core.createPlayer(800, 500);
-    assert.equal(p.x, 400);
-    assert.equal(p.y, 390);
-    assert.equal(p.invulnerable, 0);
-    assert.ok(p.radius > 0 && p.speed > 0);
-  });
-});
-// __PART2__
