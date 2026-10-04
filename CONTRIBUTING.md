@@ -28,11 +28,16 @@ python3 -m http.server 8000
 ## 提交前必须通过的自检
 
 ```bash
-node --check assets/js/game.js      # JS 语法
-node scripts/check-project.mjs      # 结构 / 依赖 / 必需文件
+node --check assets/js/game.js          # 渲染与输入层语法
+node --check assets/js/game-core.js     # 纯逻辑层语法
+node --check assets/js/game-audio.js    # 音效层语法
+node --test tests/game-core.test.mjs    # 逻辑层单元测试
+node --test tests/game-audio.test.mjs   # 音效层单元测试
+node scripts/check-project.mjs          # 结构 / 零依赖 / 必需文件 / 体积预算
 ```
 
-这两条同时也是 CI 会在每次 push 和 PR 上执行的检查，本地跑通再提交能省一轮往返。
+以上全部零依赖，也正是 CI 会在每次 push 和 PR 上执行的检查，本地跑通再提交能省一轮往返。
+（CI 另外还会确认仓库里没有 `package.json` / `node_modules`，以及关键文件都已纳入版本管理。）
 
 ## 提 Issue
 
