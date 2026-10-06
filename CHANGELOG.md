@@ -67,5 +67,7 @@
 - 补充 `LICENSE`、`CONTRIBUTING`、`CODE_OF_CONDUCT`、`SECURITY` 与更新日志
 - 引入 GitHub Actions 持续集成：JS 语法检查、HTML 规范校验、零外部资源校验
 
-[未发布]: https://github.com/wulier-arch/interstellar-courier/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/wulier-arch/interstellar-courier/releases/tag/v1.0.0
+[未发布]: https://github.com/wulier-arch/interstellar-courier/compare/b29956c...HEAD
+[1.2.0]: https://github.com/wulier-arch/interstellar-courier/compare/7645153...b29956c
+[1.1.0]: https://github.com/wulier-arch/interstellar-courier/compare/af7345a...7645153
+[1.0.0]: https://github.com/wulier-arch/interstellar-courier/commit/af7345a
