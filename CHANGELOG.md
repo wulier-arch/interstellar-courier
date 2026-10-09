@@ -4,6 +4,13 @@
 
 ## [未发布]
 
+### 工程化
+
+- CI 与 Pages 的 GitHub Actions 升级到最新主版本（`checkout` v7、`setup-node` v7、
+  `configure-pages` v6、`upload-pages-artifact` v5、`deploy-pages` v5）
+- 贡献指南补上 CI 实际执行的全部自检命令（3 个语法检查、2 个测试文件与项目自检脚本），
+  并说明 CI 另外会确认零依赖与关键文件已提交
+
 ### 计划中
 
 - 无障碍增强：完整键盘焦点管理与屏幕阅读器实时播报
